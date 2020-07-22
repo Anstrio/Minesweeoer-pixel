@@ -1,0 +1,84 @@
+body {
+    box-sizing: border-box;
+}
+
+.cell {
+    border: 2px solid darkgreen;
+    height: 40px;
+    width: 40px;
+    /* background-color: rgb(111, 206, 17); */
+    background: url("../img/grass.jpg");
+}
+
+.cell:hover {
+    background-image: radial-gradient( lawngreen, green);
+}
+
+.board {
+    margin-top: 500px;
+    font-size: 2em;
+    color: white;
+    margin: 50px auto;
+    border: 5px solid black;
+}
+
+img {
+    height: 30px;
+    width: 30px;
+}
+
+.container {
+    margin: auto;
+    border: 5px solid black;
+    width: 95%;
+    height: 95%;
+}
+
+.revealed {
+    background-image: lightsalmon;
+}
+
+.clickedBomb,
+.clickedBomb:hover {
+    background-image: linear-gradient(to bottom right, red, darkred);
+}
+
+.hint {
+    height: 100px;
+    width: 100px;
+    filter: drop-shadow(5px 5px 5px yellow);
+}
+
+.restart {
+    font-size: 2rem;
+    border: 0px;
+    background-color: transparent;
+}
+
+.stats {
+    position: relative;
+    top: 10px;
+    left: 10px;
+    float: left;
+    height: 200px;
+    width: 100%;
+}
+
+.timer {
+    border: 2px solid black;
+    display: inherit;
+    width: 500px;
+    height: 20px;
+}
+
+.lives {
+    width: 150px;
+    border: 2px solid black;
+}
+
+.timer * {
+    float: left;
+    width: 30%;
+    margin: auto;
+    background-color: lightblue;
+}

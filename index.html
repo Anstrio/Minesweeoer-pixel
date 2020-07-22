@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="css/main.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minesweeper!</title>
+</head>
+
+<body onload="init()" oncontextmenu="return false">
+    <div class="container">
+        <div class="stats">
+            <div class="lives"></div>
+            <div class="timer">Timer:
+                <div class="digit3">0</div>
+                <div class="digit2">0</div>
+                <div class="digit1">0</div>
+            </div>
+            <button onclick="setDifficulty(0)" class="difficulty">Easy</button>
+            <button onclick="setDifficulty(1)" class="difficulty">Normal</button>
+            <button onclick="setDifficulty(2)" class="difficulty">Hard</button>
+            <button class="restart" onclick="init()">Restart</button>
+            <div class="hints">hints:</div>
+            <div class="lives">lives:</div>
+        </div>
+        <table class="board">
+    </div>
+
+    </table>
+    <script src="js/stats.js"></script>
+    <script src="js/mines.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
