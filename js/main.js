@@ -4,7 +4,7 @@ const MINE = '<img src ="img/mine.png">',
     USED_HINT = 'img/hintUsed.png',
     UN_USED_HINT = 'img/hintUnused.png',
     FLAG = '<img src ="img/flag.png">',
-    HEART = '<img src="img/heart.jpg">',
+    HEART = '<img src="img/heart.png">',
     GAME_ON = '😀',
     GAME_OVER = '😭',
     GAME_WON = '😎',
@@ -19,32 +19,41 @@ var gBoard,
     gDifficulties,
     gRestartBtn,
     gGameOverSound,
-    gElLives;
+    gElLives,
+    gGameStates;
 
 
 //sets the board
 function init() {
+    resetTimer();
+    gGameStates = [];
     gElLives = document.querySelector('.lives');
     gElLives.innerHTML = 'Lives left: 3';
-    // clearInterval(gTimerInterval);
+    clearInterval(gTimerInterval);
     gTimerInterval = null;
-    gDifficulties = [{ size: 4, mines: 2 }, { size: 8, mines: 12 }, { size: 12, mines: 30 }]
-    gLevel = { size: 4, mines: 2 }
+    gDifficulties = [{ size: 4, mines: 2, diff: 'easy' }, { size: 8, mines: 12, diff: 'normal' },
+        { size: 12, mines: 30, diff: 'hard' }, { size: 12, mines: 0, diff: 'manual' }
+    ]
+    gLevel = { size: 4, mines: 2, diff: 'easy' }
     gGame = {
         isOn: true,
         shownCount: 0,
         markedCount: 0,
         secsPassed: 0,
         hintOn: false,
-        livesLeft: 3
+        livesLeft: 3,
+        safeClicks: 3,
+        isPlacingMines: false
     }
-    getHighscore();
+    printHighscore();
     gBoard = createBoard(gLevel.size);
     renderBoard(gBoard);
     createHints();
     gRestartBtn = document.querySelector('.restart');
     gRestartBtn.innerText = GAME_ON;
+    document.querySelector('.safe').innerText = `Safe clicks left: ${gGame.safeClicks}`;
     addHearts();
+    setModal();
 }
 
 //creates the board mat
@@ -72,6 +81,12 @@ function createBoard(size) {
 function cellClicked(elCell, i, j, event) {
     //don't start if the game is over!
     if (!gGame.isOn) return;
+    //If the player is currently placing mines, 
+    if (gGame.isPlacingMines) {
+        if (event.button) return;
+        placeMineManual(i, j);
+        return;
+    }
     //if the player used a hint:
     if (gGame.hintOn) {
         revealNegs(gBoard, i, j);
@@ -81,9 +96,11 @@ function cellClicked(elCell, i, j, event) {
     //on the first click, places the mines and starts the game.
     if (!gTimerInterval) {
         setTimer();
-        placeMines(i, j, gLevel.mines);
+        if (gLevel.diff === 'manual') setMinesNegsCount();
+        else placeMines(i, j, gLevel.mines);
         gGame.isOn = true;
     }
+    saveState();
     var currCell = gBoard[i][j];
     (event.button) ? cellMarked(elCell, currCell): expandShown(elCell, currCell);
 }
@@ -92,10 +109,10 @@ function cellClicked(elCell, i, j, event) {
 //Cell right clicked
 function cellMarked(elCell, currCell) {
     if (currCell.isMarked) {
-        elCell.innerText = '';
         currCell.isMarked = false;
         gGame.markedCount--;
         elCell.classList.remove('revealed');
+        hideCell(currCell.i, currCell.j);
     } else {
         currCell.isMarked = true;
         renderCell(gBoard, currCell.i, currCell.j);
@@ -108,7 +125,7 @@ function cellMarked(elCell, currCell) {
 function expandShown(elCell, currCell) {
     //if the cell has already been clicked: stop
     if (currCell.isMarked || currCell.isShown) return;
-
+    currCell.isShown = true;
     if (currCell.isMine) {
         new Audio('sfx/wrong.mp3').play();
         elCell.classList.add('clickedBomb');
@@ -117,14 +134,23 @@ function expandShown(elCell, currCell) {
         (gGame.livesLeft) ? lifeLost(currCell.i, currCell.j, elCell): gameOver(elCell);
     } else {
         gGame.shownCount++;
-        checkVictory();
+        if (currCell.negsCount === 0) {
+            for (var i = currCell.i - 1; i <= currCell.i + 1; i++) {
+                if (i < 0 || i >= gBoard.length) continue;
+                for (var j = currCell.j - 1; j <= currCell.j + 1; j++) {
+                    if (j < 0 || j >= gBoard[0].length || gBoard[i][j].isMine) continue;
+                    var elNegCell = document.querySelector(`#cell${i}-${j}`);
+                    expandShown(elNegCell, gBoard[i][j]);
+                }
+            }
+        }
     }
-    currCell.isShown = true;
+    checkVictory();
     renderCell(gBoard, currCell.i, currCell.j);
 }
 
 
-function gameOver(elCell) {
+function gameOver() {
     gRestartBtn.innerText = GAME_OVER;
     gGame.isOn = false;
     console.log('Game over!');
@@ -135,41 +161,18 @@ function gameOver(elCell) {
 function checkVictory() {
     if (gLevel.mines === gGame.markedCount &&
         gGame.markedCount + gGame.shownCount === gLevel.size ** 2) {
-        localStorage.setItem("highscore", gGame.secsPassed);
-        console.log(localStorage.getItem("highscore"));
+        var diff = gLevel.diff;
+        //if your current score is your highest one or if you did not have a previous score, set the current one as highscore
+        if (!localStorage.getItem(diff) || localStorage.getItem(diff) > gGame.secsPassed) localStorage.setItem(gLevel.diff, gGame.secsPassed);
         gRestartBtn.innerText = GAME_WON;
         gGame.isOn = false;
         clearInterval(gTimerInterval);
-        console.log('You won!');
+        document.querySelector('.modal').innerText = `You won!\n it took you ${gGame.secsPassed} seconds.`;
     }
 }
 
-function useHint(elCell) {
-    if (gGame.hintOn || elCell.dataset.used === 'true' || !gGame.isOn) return;
-    gGame.hintOn = true;
-    elCell.dataset.used = 'true';
-    elCell.src = USED_HINT;
+function saveState() {
+    gGameStates.push([Object.assign({}, gGame), copy2DArr(gBoard)]);
+    console.log(gGameStates[gGameStates.length - 1]);
 }
-
-
-function createHints() {
-    var elHints = document.querySelector('.hints');
-    var strHtml = 'Hints:';
-    for (var i = 0; i < 3; i++) {
-        strHtml += `<img data-used="false" onclick="useHint(this)" src=${UN_USED_HINT} id="hint${i+1}">`;
-    }
-    elHints.innerHTML = strHtml;
-}
-
-function lifeLost(i, j, elCell) {
-    console.log(`Lives Left: ${gGame.livesLeft}`);
-    setTimeout(() => {
-        var currCell = gBoard[i][j];
-        currCell.isShown = false;
-        console.log(currCell);
-        elCell.classList.remove('clickedBomb');
-        hideCell(i, j);
-    }, 1000);
-}
-//To do: change the i and j requirements in some functions to use currCell.i/j
-//change the timer to images of numbers, with the innerHTML made by a function
+//undo button

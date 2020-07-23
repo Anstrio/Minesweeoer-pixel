@@ -6,10 +6,12 @@ function renderBoard(board) {
         for (var j = 0; j < board[0].length; j++) {
             var currCell = gBoard[i][j];
             var cellContent = '';
+            var cellClass = 'class="cell"';
             if (currCell.isShown) {
                 cellContent = (currCell.isMine) ? MINE : currCell.negsCount;
+                cellClass = 'class="cell, revealed"';
             } else cellContent = TREE;
-            strHtml += `<th id="cell${i}-${j}" class="cell" onmouseup="cellClicked(this, ${i}, ${j}, event)">${cellContent} </th>`;
+            strHtml += `<th id="cell${i}-${j}" ${cellClass} onmouseup="cellClicked(this, ${i}, ${j}, event)">${cellContent} </th>`;
         }
         strHtml += '</tr>';
     }
@@ -33,7 +35,8 @@ function renderCell(mat, i, j) {
 //hides a cell's content, used in the revealNegs function
 function hideCell(i, j) {
     var elCell = document.querySelector(`#cell${i}-${j}`);
-    var strHtml = `<th id="cell${i}-${j}" class="cell" onmouseup="cellClicked(this, ${i}, ${j}, event)">${TREE} </th>`;
+    var cellContent = (gBoard[i][j].isMarked) ? FLAG : TREE;
+    var strHtml = `<th id="cell${i}-${j}" class="cell" onmouseup="cellClicked(this, ${i}, ${j}, event)">${cellContent} </th>`;
     elCell.innerHTML = strHtml;
     elCell.classList.remove('revealed');
 }
@@ -99,15 +102,14 @@ function countNegs(iCounted, jCounted) {
     }
 }
 
-function addHearts() {
-    var strHtml = '';
-    for (var i = 0; i < gGame.livesLeft; i++) {
-        strHtml += HEART;
+//copies a 2d array
+function copy2DArr(arr) {
+    var res = []
+    for (var i = 0; i < arr.length; i++) {
+        res[i] = [];
+        for (var j = 0; j < arr[i].length; j++) {
+            res[i][j] = Object.assign({}, arr[i][j]);
+        }
     }
-    document.querySelector('.lives').innerHTML = `Lives: ${strHtml}`;
-}
-
-function getHighscore() {
-    var strHtml = 'Highscore';
-    console.log(strHtml);
+    return res;
 }
