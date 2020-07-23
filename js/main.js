@@ -5,6 +5,7 @@ const MINE = '<img src ="img/mine.png">',
     UN_USED_HINT = 'img/hintUnused.png',
     FLAG = '<img src ="img/flag.png">',
     HEART = '<img src="img/heart.png">',
+    HEART_BROKEN = '<img src="img/heartLost.png">',
     GAME_ON = '😀',
     GAME_OVER = '😭',
     GAME_WON = '😎',
@@ -20,11 +21,13 @@ var gBoard,
     gRestartBtn,
     gGameOverSound,
     gElLives,
-    gGameStates;
+    gGameStates,
+    gModalText;
 
 
 //sets the board
 function init() {
+    gModalText = document.querySelector('#modalText');
     resetTimer();
     gGameStates = [];
     gElLives = document.querySelector('.lives');
@@ -108,6 +111,7 @@ function cellClicked(elCell, i, j, event) {
 
 //Cell right clicked
 function cellMarked(elCell, currCell) {
+    if (currCell.isShown) return;
     if (currCell.isMarked) {
         currCell.isMarked = false;
         gGame.markedCount--;
@@ -167,7 +171,8 @@ function checkVictory() {
         gRestartBtn.innerText = GAME_WON;
         gGame.isOn = false;
         clearInterval(gTimerInterval);
-        document.querySelector('.modal').innerText = `You won!\n it took you ${gGame.secsPassed} seconds.`;
+        gModalText.innerText = `You won!\n it took you ${gGame.secsPassed} seconds.`;
+        document.querySelector('.undo').style.display = 'none';
     }
 }
 
@@ -175,4 +180,32 @@ function saveState() {
     gGameStates.push([Object.assign({}, gGame), copy2DArr(gBoard)]);
     console.log(gGameStates[gGameStates.length - 1]);
 }
-//undo button
+
+function restart() {
+    document.querySelector('.undo').style.display = '';
+    resetTimer();
+    gGameStates = [];
+    gElLives = document.querySelector('.lives');
+    gElLives.innerHTML = 'Lives left: 3';
+    clearInterval(gTimerInterval);
+    gTimerInterval = null;
+    gGame = {
+        isOn: true,
+        shownCount: 0,
+        markedCount: 0,
+        secsPassed: 0,
+        hintOn: false,
+        livesLeft: 3,
+        safeClicks: 3,
+        isPlacingMines: false
+    }
+    printHighscore();
+    gBoard = createBoard(gLevel.size);
+    renderBoard(gBoard);
+    createHints();
+    gRestartBtn = document.querySelector('.restart');
+    gRestartBtn.innerText = GAME_ON;
+    document.querySelector('.safe').innerText = `Safe clicks left: ${gGame.safeClicks}`;
+    addHearts();
+    setModal();
+}

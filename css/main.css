@@ -80,7 +80,7 @@ img {
     position: relative;
     font-size: 2rem;
     border: 0px;
-    top: 1%;
+    top: 5px;
     left: 40%;
     background-color: transparent;
 }
@@ -105,8 +105,9 @@ img {
 }
 
 .lives {
-    border: 1px solid black;
-    height: 20%;
+    position: relative;
+    top: 10px;
+    height: 10%;
     text-align: center;
     width: 22%;
 }

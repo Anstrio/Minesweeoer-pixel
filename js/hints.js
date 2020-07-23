@@ -35,17 +35,16 @@ function safeClick() {
 }
 
 
-function undo(key = 'z') {
+function undo() {
     if (!gGame.isOn || !gGameStates.length) return;
-    if (key === 'z') {
-        var gameState = gGameStates.pop();
-        console.log(gGameStates);
-        console.log(gameState);
-        gGame = Object.assign({}, gameState[0]);
-        gBoard = copy2DArr(gameState[1]);
-        // debugger;
-        renderBoard(gBoard);
-        addHearts();
-        document.querySelector('.safe').innerText = `Safe clicks left: ${gGame.safeClicks}`
-    }
+    var gameState = gGameStates.pop();
+    console.log(gGameStates);
+    console.log(gameState);
+    gGame = Object.assign({}, gameState[0]);
+    gBoard = copy2DArr(gameState[1]);
+    // debugger;
+    renderBoard(gBoard);
+    addHearts();
+    document.querySelector('.safe').innerText = `Safe clicks left: ${gGame.safeClicks}`
+
 }

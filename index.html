@@ -8,7 +8,7 @@
     <title>Minesweeper!</title>
 </head>
 
-<body onkeyup="undo(event.key)" onload="init()" oncontextmenu="return false">
+<body onload="init()" oncontextmenu="return false">
     <div class="instructions">
         <h1>Instructions:</h1>
         <p>Use the left click to uncover a spot(beware of the mines!) and the right click to mark spots you suspect to be mines.</p>
@@ -27,7 +27,10 @@
         <h3>Safe Click</h3>
         <p>Will mark a spot that does not have a mine for a couple of seconds.</p>
     </div>
-    <div class="modal">Hello there</div>
+    <div class="modal">
+        <p id="modalText"></p>
+        <button class="undo" onclick="undo()">Undo</button>
+    </div>
     <div class="container">
         <div class="containerTop">
             <div class="stats">
@@ -41,7 +44,7 @@
                 <button onclick="setDifficulty(2)" class="difficulty">Hard</button>
                 <button onclick="setDifficulty(3)" class="difficulty">Manual</button>
             </div>
-            <button class="restart" onclick="init()">Restart</button>
+            <button class="restart" onclick="restart()">Restart</button>
         </div>
         <table class="board">
     </div>

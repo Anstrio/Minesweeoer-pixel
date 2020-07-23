@@ -47,11 +47,13 @@ function resetTimer() {
 
 function lifeLost(i, j, elCell) {
     gRestartBtn.innerText = OUCH;
+    gGame.isOn = false;
     setTimeout(() => {
         gRestartBtn.innerText = GAME_ON;
         var currCell = gBoard[i][j];
         currCell.isShown = false;
         elCell.classList.remove('clickedBomb');
+        gGame.isOn = true;
         hideCell(i, j);
     }, 1000);
 }
@@ -61,7 +63,10 @@ function addHearts() {
     console.log(gGame.livesLeft);
     var strHtml = 'Lives Left:<br>';
     for (var i = 0; i < gGame.livesLeft; i++) {
-        strHtml += `${HEART} `;
+        strHtml += HEART;
+    }
+    for (var i = gGame.livesLeft; i < 3; i++) {
+        strHtml += HEART_BROKEN;
     }
     document.querySelector('.lives').innerHTML = strHtml;
 }
@@ -87,6 +92,6 @@ function getAsImgNum(num) {
 
 function setModal() {
     var strHtml = '';
-    strHtml = `difficulty: ${gLevel.diff}\n mines: ${gLevel.mines}`;
-    document.querySelector('.modal').innerText = strHtml;
+    strHtml = `Minesweeper:\n difficulty: ${gLevel.diff}\n mines: ${gLevel.mines}`;
+    gModalText.innerText = strHtml;
 }
